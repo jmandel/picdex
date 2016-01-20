@@ -7,18 +7,24 @@ from datetime import datetime, timedelta
 
 CHUNK_SIZE_NFILES = 200
 
+
 class Processor(object):
+
     def __init__(self, config_file):
         self.config_file = config_file
         self.config_dir = os.path.dirname(self.config_file)
         self.db = config_load(self.config_file)
+
     def update_db(self):
         update_db(self.db, self.config_dir)
+
     def save(self):
         config_save(self.db, self.config_file)
 
+
 def to_epoch(dt):
     return int(time.mktime(dt.timetuple()))
+
 
 def merge_dicts(*dict_args):
     result = {}
@@ -26,20 +32,25 @@ def merge_dicts(*dict_args):
         result.update(dictionary)
     return result
 
+
 def config_load(f):
     if os.path.exists(f):
         with open(f, "r") as fp:
-            try: return json.load(fp)
-            except: pass
+            try:
+                return json.load(fp)
+            except:
+                pass
     print("Building new catalog")
     return {
         'last_run_at': to_epoch(datetime(1900, 1, 1)),
         'images': {}
     }
 
+
 def config_save(c, f):
     with open(f, "w") as fp:
         json.dump(c, fp, indent=2)
+
 
 def files_since(when, dir_to_scan):
     ret = []
@@ -54,13 +65,16 @@ def files_since(when, dir_to_scan):
 
     return ret
 
+
 def time_of(tstring):
     d = datetime.strptime(tstring[:19], "%Y:%m:%d %H:%M:%S")
     return to_epoch(d)
 
+
 def chunks(l, n):
     for i in range(0, len(l), n):
-        yield l[i:i+n]
+        yield l[i:i + n]
+
 
 def get_exif_in_chunks(files, dir_to_scan):
     ret = {}
@@ -68,8 +82,8 @@ def get_exif_in_chunks(files, dir_to_scan):
         ret.update(get_exif(filechunk, dir_to_scan))
     return ret
 
-def get_exif(files, dir_to_scan):
 
+def get_exif(files, dir_to_scan):
     ret = {}
     if len(files) == 0:
         return ret
@@ -96,6 +110,7 @@ def get_exif(files, dir_to_scan):
             'i': scanned['ISO'] if 'ISO' in scanned else None
         }
     return ret
+
 
 def update_db(config, config_dir):
     this_run_at = to_epoch(datetime.now())
